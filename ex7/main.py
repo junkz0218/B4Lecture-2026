@@ -79,6 +79,8 @@ def plot_loss(train_losses, val_losses, path):
 
 
 def main():
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
     parser = argparse.ArgumentParser(description="VAE training on MNIST")
     parser.add_argument("--z_dim", type=int, default=2, help="潜在変数の次元数")
     parser.add_argument("--h_dim", type=int, default=400, help="中間層の次元数")
