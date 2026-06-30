@@ -99,8 +99,16 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
-    os.makedirs("./params", exist_ok=True)
-    os.makedirs("./images", exist_ok=True)
+    # 設定内容をまとめたディレクトリ名（設定ごとに結果を分けて保存する）
+    run_name = (
+        f"z{args.z_dim}_h{args.h_dim}_drop{args.drop_rate}"
+        f"_lr{args.lr}_ep{args.epochs}"
+    )
+    params_dir = f"./params/{run_name}"
+    img_dir = f"./images/{run_name}"
+    os.makedirs(params_dir, exist_ok=True)
+    os.makedirs(img_dir, exist_ok=True)
+    print(f"Run: {run_name}")
 
     train_loader, val_loader, test_loader = get_data_loaders(
         args.batch_size, args.train_rate
@@ -109,7 +117,7 @@ def main():
     model = VAE(args.z_dim, args.h_dim, args.drop_rate).to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    model_path = f"./params/model_z{args.z_dim}_h{args.h_dim}.pth"
+    model_path = f"{params_dir}/model.pth"
     best_val_loss = float("inf")
     patience_count = 0
     train_losses, val_losses = [], []
@@ -131,12 +139,12 @@ def main():
                 print(f"Early stopping at epoch {epoch}.")
                 break
 
-    plot_loss(train_losses, val_losses, "./images/loss_curve.png")
+    plot_loss(train_losses, val_losses, f"{img_dir}/loss_curve.png")
 
     # 可視化
     model.load_state_dict(torch.load(model_path, weights_only=True))
     model.eval()
-    vis = Visualize(args.z_dim, args.h_dim, test_loader, model, device)
+    vis = Visualize(args.z_dim, args.h_dim, test_loader, model, device, img_dir)
     vis.createDirectories()
     vis.reconstruction()
     vis.latent_space()

@@ -31,3 +31,6 @@ venv/
 
 # claude
 .claude
+
+# image
+images/

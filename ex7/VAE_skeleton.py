@@ -138,9 +138,9 @@ class VAE(nn.Module):
         # TODO: KL[q(z|x) || p(z)] の解析解を実装する。
         #       torch.distributions.kl_divergence() の使用は禁止。
         kl = -0.5 * torch.sum(
-            1 + log_var - mean.pow(2) - torch.exp(log_var)
+            1 + log_var - mean.pow(2) - torch.exp(log_var), dim=1
         )
-        return kl.mean()   # バッチ方向に平均してスカラーに
+        return kl.sum()   # バッチ方向に合算してスカラーに
 
     def forward(self, x: torch.Tensor):
         """ELBO の各項を計算してフォワードパスを実行する。
@@ -171,6 +171,6 @@ class VAE(nn.Module):
         elbo_rec = torch.sum(
             x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps),
             dim=1,
-        ).mean()
+        ).sum()
 
         return [elbo_kl, elbo_rec], z, y

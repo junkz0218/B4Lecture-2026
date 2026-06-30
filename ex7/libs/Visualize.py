@@ -19,16 +19,17 @@ class Visualize:
         walkthrough/     : 潜在空間の補間 GIF アニメーション（z_dim=2 のみ）
     """
 
-    def __init__(self, z_dim, h_dim, dataloader_test, model, device):
+    def __init__(self, z_dim, h_dim, dataloader_test, model, device, img_dir="./images"):
         self.z_dim = z_dim
         self.h_dim = h_dim
         self.dataloader_test = dataloader_test
         self.model = model
         self.device = device
+        self.img_dir = img_dir
 
     def createDirectories(self):
         for d in ["reconstruction", "latent_space", "lattice_point", "walkthrough"]:
-            os.makedirs(f"./images/{d}", exist_ok=True)
+            os.makedirs(f"{self.img_dir}/{d}", exist_ok=True)
 
     def reconstruction(self):
         """入力画像と再構成画像を並べて保存する。"""
@@ -46,7 +47,7 @@ class Visualize:
             for i, im in enumerate(y[:10]):
                 axes[1][i].imshow(im, "gray")
 
-            fig.savefig(f"./images/reconstruction/z{self.z_dim}_{batch_idx}.png")
+            fig.savefig(f"{self.img_dir}/reconstruction/z{self.z_dim}_{batch_idx}.png")
             plt.close(fig)
 
     def latent_space(self):
@@ -66,10 +67,10 @@ class Visualize:
 
             ax_plot.legend(loc="upper right")
             fig_plot.savefig(
-                f"./images/latent_space/z{self.z_dim}_{batch_idx}_plot.png"
+                f"{self.img_dir}/latent_space/z{self.z_dim}_{batch_idx}_plot.png"
             )
             fig_scatter.savefig(
-                f"./images/latent_space/z{self.z_dim}_{batch_idx}_scatter.png"
+                f"{self.img_dir}/latent_space/z{self.z_dim}_{batch_idx}_scatter.png"
             )
             plt.close(fig_plot)
             plt.close(fig_scatter)
@@ -94,7 +95,7 @@ class Visualize:
                 axes[i][j].set_yticks([])
                 axes[i][j].imshow(imgs[n * (n - 1 - i) + j], "gray")
         fig.subplots_adjust(wspace=0, hspace=0)
-        fig.savefig(f"./images/lattice_point/z{self.z_dim}.png")
+        fig.savefig(f"{self.img_dir}/lattice_point/z{self.z_dim}.png")
         plt.close(fig)
 
     def walkthrough(self):
@@ -122,5 +123,5 @@ class Visualize:
             anim = ArtistAnimation(
                 fig, images, interval=100, blit=True, repeat_delay=1000
             )
-            anim.save(f"./images/walkthrough/z{self.z_dim}_{n}.gif", writer="pillow")
+            anim.save(f"{self.img_dir}/walkthrough/z{self.z_dim}_{n}.gif", writer="pillow")
             plt.close(fig)
