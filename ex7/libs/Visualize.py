@@ -19,7 +19,9 @@ class Visualize:
         walkthrough/     : 潜在空間の補間 GIF アニメーション（z_dim=2 のみ）
     """
 
-    def __init__(self, z_dim, h_dim, dataloader_test, model, device, img_dir="./images"):
+    def __init__(
+        self, z_dim, h_dim, dataloader_test, model, device, img_dir="./images"
+    ):
         self.z_dim = z_dim
         self.h_dim = h_dim
         self.dataloader_test = dataloader_test
@@ -123,5 +125,7 @@ class Visualize:
             anim = ArtistAnimation(
                 fig, images, interval=100, blit=True, repeat_delay=1000
             )
-            anim.save(f"{self.img_dir}/walkthrough/z{self.z_dim}_{n}.gif", writer="pillow")
+            anim.save(
+                f"{self.img_dir}/walkthrough/z{self.z_dim}_{n}.gif", writer="pillow"
+            )
             plt.close(fig)

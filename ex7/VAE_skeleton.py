@@ -75,9 +75,9 @@ class VAE(nn.Module):
         x = x.view(-1, self.x_dim)
         # TODO: enc_fc1 → ReLU → enc_fc2 → ReLU の順に通す。
         #      その後 enc_fc3_mean と enc_fc3_logvar に通して mean と log_var を返す。
-        h = torch.relu(self.enc_fc1(x))   # 784 → h_dim
-        h = torch.relu(self.enc_fc2(h))   # h_dim → h_dim//2
-        mean    = self.enc_fc3_mean(h)    # h_dim//2 → z_dim
+        h = torch.relu(self.enc_fc1(x))  # 784 → h_dim
+        h = torch.relu(self.enc_fc2(h))  # h_dim → h_dim//2
+        mean = self.enc_fc3_mean(h)  # h_dim//2 → z_dim
         log_var = self.enc_fc3_logvar(h)  # h_dim//2 → z_dim（同じ h から分岐）
         return mean, log_var
 
@@ -101,8 +101,8 @@ class VAE(nn.Module):
         """
         # TODO: mean と同じ形状の ε を標準正規分布からサンプリングし、z を計算して返す。
 
-        eps = torch.randn_like(mean)            # ε ~ N(0, I)
-        z   = mean + eps * torch.exp(0.5 * log_var)  # z = μ + ε ⊙ σ
+        eps = torch.randn_like(mean)  # ε ~ N(0, I)
+        z = mean + eps * torch.exp(0.5 * log_var)  # z = μ + ε ⊙ σ
         return z
 
     def decoder(self, z: torch.Tensor) -> torch.Tensor:
@@ -117,9 +117,9 @@ class VAE(nn.Module):
         参照: "Auto-Encoding Variational Bayes" Appendix C.1
         """
         # TODO: dec_fc1 → ReLU → dec_fc2 → ReLU → dec_drop → dec_fc3 → Sigmoid の順に通す。
-        h = torch.relu(self.dec_fc1(z))   # z_dim → h_dim//2
-        h = torch.relu(self.dec_fc2(h))   # h_dim//2 → h_dim
-        h = self.dec_drop(h)              # Dropout は dec_fc3 の直前
+        h = torch.relu(self.dec_fc1(z))  # z_dim → h_dim//2
+        h = torch.relu(self.dec_fc2(h))  # h_dim//2 → h_dim
+        h = self.dec_drop(h)  # Dropout は dec_fc3 の直前
         y = torch.sigmoid(self.dec_fc3(h))  # h_dim → 784
         return y
 
@@ -137,10 +137,8 @@ class VAE(nn.Module):
         """
         # TODO: KL[q(z|x) || p(z)] の解析解を実装する。
         #       torch.distributions.kl_divergence() の使用は禁止。
-        kl = -0.5 * torch.sum(
-            1 + log_var - mean.pow(2) - torch.exp(log_var), dim=1
-        )
-        return kl.sum()   # バッチ方向に合算してスカラーに
+        kl = -0.5 * torch.sum(1 + log_var - mean.pow(2) - torch.exp(log_var), dim=1)
+        return kl.sum()  # バッチ方向に合算してスカラーに
 
     def forward(self, x: torch.Tensor):
         """ELBO の各項を計算してフォワードパスを実行する。
@@ -165,7 +163,7 @@ class VAE(nn.Module):
         z = self.reparametrization_trick(mean, log_var)
         y = self.decoder(z)
 
-        elbo_kl  = -self.kld(mean, log_var)   # 符号反転で ≤ 0 にする
+        elbo_kl = -self.kld(mean, log_var)  # 符号反転で ≤ 0 にする
 
         # Bernoulli 対数尤度（Appendix C.1 Eq.11）
         elbo_rec = torch.sum(
