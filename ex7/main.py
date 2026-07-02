@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import torch
 from libs.Visualize import Visualize
 from torch import optim
+from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, transforms
 from VAE_skeleton import VAE
 
@@ -108,6 +109,9 @@ def main():
     img_dir = f"./images/{run_name}"
     os.makedirs(params_dir, exist_ok=True)
     os.makedirs(img_dir, exist_ok=True)
+    # TensorBoard: run ごとに別ディレクトリへ記録（同じタグ名で書くと
+    # `tensorboard --logdir runs` で各 run の Loss を重ねて比較できる）
+    writer = SummaryWriter(log_dir=f"./runs/{run_name}")
     print(f"Run: {run_name}")
 
     train_loader, val_loader, test_loader = get_data_loaders(
@@ -127,6 +131,8 @@ def main():
         val_loss = evaluate(model, val_loader, device)
         train_losses.append(train_loss)
         val_losses.append(val_loss)
+        writer.add_scalar("Loss/train", train_loss, epoch)
+        writer.add_scalar("Loss/val", val_loss, epoch)
         print(f"[Epoch {epoch:3d}]  train: {train_loss:9.1f}  val: {val_loss:9.1f}")
 
         if val_loss < best_val_loss:
@@ -139,6 +145,7 @@ def main():
                 print(f"Early stopping at epoch {epoch}.")
                 break
 
+    writer.close()
     plot_loss(train_losses, val_losses, f"{img_dir}/loss_curve.png")
 
     # 可視化
